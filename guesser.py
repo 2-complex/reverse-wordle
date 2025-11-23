@@ -29,4 +29,11 @@ def guess(guesses):
             "cites":cites
         }
 
+    if len(guesses) > 0 and guesses[-1].score == [1,1,1,1,1]:
+        return {
+            "title":"Thank you",
+            "message": "Word guessed!",
+            "cites":[]
+        }
+
     return {"next": random.choice(words)}
