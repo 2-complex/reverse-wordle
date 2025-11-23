@@ -1,0 +1,93 @@
+
+function letter_button(initial, score, index)
+{
+    let $letter = $("<button>").text(initial).addClass("letter").addClass("pop-in-element").addClass("incorrect");
+    $letter.click(function()
+    {
+        let options = ["incorrect", "correct", "misplaced"];
+        for( let i = 0; i < 3; i++ )
+        {
+            let option = options[i];
+            if( $letter.hasClass(option) )
+            {
+                let j = (i+1)%3;
+                score[index] = j;
+                $letter.removeClass(option);
+                $letter.addClass(options[j]);
+                break;
+            }
+        }
+    });
+
+    return $letter
+}
+
+var guesses = [];
+
+function add_guess(word)
+{
+    new_guess = {word: word, score: [0,0,0,0,0]}
+    guesses.push(new_guess);
+
+    console.log(word)
+    letter_buttons = word.substring(0, 5).split('').map((c, index) => letter_button(c, new_guess.score, index));
+    setTimeout(function() { letter_buttons[0].focus() }, 10);
+
+    return $("<div>").addClass("guess").append(letter_buttons);
+}
+
+document.addEventListener('DOMContentLoaded', () =>
+{
+    let $guesses = $("<div id='guesses'>").addClass("guesses");
+    let $controls = $("<div id='controls'>").addClass("controls");
+
+    let $title = $("<div>").text("Welcome to Reverse Wordle").addClass("dialog-title")
+    $controls.append($title)
+
+    let $dialog_body = $("<div>").html("In ordinary Wordle, the computer chooses a word, keeps that word a secret and you guess.<br/><br/>In this game, you pick a word, and the computer guesses.<br/><br/>So, pick a word, commit to it mentally, and then hit the next button :)").addClass("dialog-body");
+    $controls.append($dialog_body)
+
+    $control_buttons = $("<div>").addClass("control-buttons");
+    $("#main").append([$guesses, $controls]);
+    $controls.append($control_buttons);
+
+    let $next_button = $("<button>").addClass("next").text("next");
+    $control_buttons.append($next_button);
+
+    setTimeout(function() { $next_button.focus() }, 10);
+
+    function clear_dialog()
+    {
+        $controls.removeClass("pop-in-element")
+        $controls.addClass("pop-out-element")
+    }
+
+    $next_button.click(function() {
+        clear_dialog()
+        $.ajax({
+            type: "POST",
+            url: "/next",
+            dataType: 'json',
+            data: JSON.stringify({guesses:guesses}),
+            success: function(response)
+            {
+                setTimeout(function() {
+                    $controls.removeClass("pop-out-element")
+                    $controls.addClass("pop-in-element")
+                    if( response.next )
+                    {
+                        $title.text("Excellent");
+                        $dialog_body.text("Now score the guess and hit next again");
+                        $guesses.append(add_guess(response.next));
+                    }
+                    else
+                    {
+                        $title.text(response.title);
+                        $dialog_body.text(response.message);
+                    }
+                }, 300);
+            },
+        });
+    });
+    $controls.addClass("pop-in-element")
+});

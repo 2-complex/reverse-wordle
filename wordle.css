@@ -1,0 +1,130 @@
+body {
+    font-family: "Arial", Helvetica, sans-serif;
+}
+
+.pop-in-element {
+    transform: scale(0.1);
+    animation: pop-in-bounce 0.2s forwards;
+    /* Optional: improve performance by hinting the browser */
+    will-change: transform, opacity;
+}
+
+@keyframes pop-in-bounce {
+    0% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+    /* Expand a little beyond the final size */
+    70% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    /* Shrink back to the final size */
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.pop-out-element {
+    opacity: 0;
+    transform: scale(0);
+    animation: pop-out-bounce 0.2s forwards;
+    will-change: transform, opacity;
+}
+
+@keyframes pop-out-bounce {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    /* Expand a little beyond the final size */
+    30% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    /* Shrink back to the final size */
+    100% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+}
+
+button:focus {
+  outline: 4px solid #aae; /* Adjust '4px' for thickness */
+  outline-offset: 0px; /* Optional: adds space between element and outline */
+}
+
+button {
+    box-shadow: none;
+    border-style: solid;
+}
+
+.guess {
+    width: 280px;
+    margin:5px;
+}
+
+.guesses {
+    margin-bottom: 30px;
+}
+
+.controls {
+    width: 350px;
+    padding: 3px;
+    height: auto;
+    margin: 5px;
+    background-color: #dde;
+}
+
+.next {
+    height:30px;
+    font-size: 20px;
+    vertical-align: middle;
+    border-color: #448;
+}
+
+.letter {
+    margin:3px;
+    font-size: 25;
+    width:50px;
+    height:50px;
+    border-color: #bbb;
+}
+
+.dialog-title {
+    padding: 5px;
+    font-size: 18;
+    font-weight: bold;
+    text-align: left;
+}
+
+.dialog-body {
+    padding: 5px;
+    font-size: 16;
+    text-align: left;
+}
+
+.control-buttons {
+    padding: 5px;
+    text-align: right;
+}
+
+.correct {
+    background-color: #1ea61a;
+    border: 0px;
+    color: white;
+}
+
+.misplaced {
+    background-color: yellow;
+    border-color: #ecec00;
+    color: black;
+}
+
+.incorrect {
+    background-color: white;
+    border-color: #ddd;
+    color: black;
+}
+
