@@ -78,9 +78,13 @@ button {
 }
 
 .next {
-    height:30px;
     font-size: 20px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 15px;
+    padding-right: 15px;
     vertical-align: middle;
+    text-align: center;
     border-color: #448;
 }
 
@@ -90,6 +94,19 @@ button {
     width:50px;
     height:50px;
     border-color: #bbb;
+}
+
+.cite::after {
+    content: "";
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    outline: 3px;
+    outline-style: solid;
+    outline-color: #aa4b00bb;
+    border-radius: 50%; /* Makes a circle */
 }
 
 .dialog-title {

@@ -1,7 +1,8 @@
 
-function letter_button(initial, score, index)
+function letter_button(initial, score, row, col)
 {
-    let $letter = $("<button>").text(initial).addClass("letter").addClass("pop-in-element").addClass("incorrect");
+    let $letter = $("<button id='let-" + row + "-" + col + "'>")
+        .text(initial).addClass("letter pop-in-element incorrect");
     $letter.click(function()
     {
         let options = ["incorrect", "correct", "misplaced"];
@@ -11,7 +12,7 @@ function letter_button(initial, score, index)
             if( $letter.hasClass(option) )
             {
                 let j = (i+1)%3;
-                score[index] = j;
+                score[col] = j;
                 $letter.removeClass(option);
                 $letter.addClass(options[j]);
                 break;
@@ -26,11 +27,11 @@ var guesses = [];
 
 function add_guess(word)
 {
-    new_guess = {word: word, score: [0,0,0,0,0]}
+    let new_guess = {word: word, score: [0,0,0,0,0]}
+    let row = guesses.length;
     guesses.push(new_guess);
 
-    console.log(word)
-    letter_buttons = word.substring(0, 5).split('').map((c, index) => letter_button(c, new_guess.score, index));
+    letter_buttons = word.substring(0, 5).split('').map((c, index) => letter_button(c, new_guess.score, row, index));
     setTimeout(function() { letter_buttons[0].focus() }, 10);
 
     return $("<div>").addClass("guess").append(letter_buttons);
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () =>
     let $title = $("<div>").text("Welcome to Reverse Wordle").addClass("dialog-title")
     $controls.append($title)
 
-    let $dialog_body = $("<div>").html("In ordinary Wordle, the computer chooses a word, keeps that word a secret and you guess.<br/><br/>In this game, you pick a word, and the computer guesses.<br/><br/>So, pick a word, commit to it mentally, and then hit the next button :)").addClass("dialog-body");
+    let $dialog_body = $("<div>").html("In ordinary Wordle, the computer picks a word, and you guess.<br/><br/>In this game, you pick a word, and the computer guesses.<br/><br/>So, pick a word, commit to it mentally, and then hit the next button :)").addClass("dialog-body");
     $controls.append($dialog_body)
 
     $control_buttons = $("<div>").addClass("control-buttons");
@@ -74,14 +75,21 @@ document.addEventListener('DOMContentLoaded', () =>
                 setTimeout(function() {
                     $controls.removeClass("pop-out-element")
                     $controls.addClass("pop-in-element")
+                    $(".letter").removeClass("cite");
                     if( response.next )
                     {
                         $title.text("Excellent");
-                        $dialog_body.text("Now score the guess and hit next again");
+                        $dialog_body.text("Score the guess and hit next again");
                         $guesses.append(add_guess(response.next));
                     }
                     else
                     {
+                        for( let i = 0; i < response.cites.length; i++ )
+                        {
+                            let cite = response.cites[i];
+                            $("#let-" + cite[0] + "-" + cite[1]).addClass("cite");
+                        }
+
                         $title.text(response.title);
                         $dialog_body.text(response.message);
                     }

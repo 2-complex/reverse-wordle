@@ -11,15 +11,22 @@ def num_to_indicator(n):
     return D.get(n, "WEIRD")
 
 def guess(guesses):
-    for guess in guesses:
+    cites = []
+    for j, guess in enumerate(guesses):
         word = guess["word"]
         score = guess["score"]
         print("word: {}".format(word, score))
         for i in range(0, 5):
             print(" {} : {}".format(word[i], num_to_indicator(score[i])))
+            if score[i] == 2 and word[i] in "AEIOU":
+                cites.append((j, i))
         print("")
 
-    if len(guesses) == 3:
-        return {"title":"Something's not right", "message": "There appear to be three guesses.  That's an awful lot.  Are you sure you want to continue?", "options":["continue"]}
+    if len(cites) > 0:
+        return {
+            "title":"Something's not right",
+            "message": "There appear to be yellow vowels.  Remove yellow vowels.  Then hit next",
+            "cites":cites
+        }
 
     return {"next": random.choice(words)}
