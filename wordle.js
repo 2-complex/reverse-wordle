@@ -6,12 +6,12 @@ function letter_button(initial, score, row, col)
     $letter.click(function()
     {
         let options = ["incorrect", "correct", "misplaced"];
-        for( let i = 0; i < 3; i++ )
+        for( let i = 0; i < options.length; i++ )
         {
             let option = options[i];
             if( $letter.hasClass(option) )
             {
-                let j = (i+1)%3;
+                let j = (i+1)%options.length;
                 score[col] = j;
                 $letter.removeClass(option);
                 $letter.addClass(options[j]);
@@ -92,6 +92,13 @@ document.addEventListener('DOMContentLoaded', () =>
 
                         $title.text(response.title);
                         $dialog_body.text(response.message);
+                    }
+
+                    if( response.gameover )
+                    {
+                        $next_button.remove();
+                        $(".letter").off("click");
+                        $(".letter").prop('disabled', true);
                     }
                 }, 300);
             },
