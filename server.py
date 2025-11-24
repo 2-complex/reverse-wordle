@@ -17,7 +17,12 @@ class WebServerHandler(BaseHTTPRequestHandler):
             "/wordle.html"
         ])
 
-        if self.path in good_paths:
+        if self.path == "" or self.path == "/":
+            self.send_response(200)
+            self.send_header("content-type", "text/html")
+            self.end_headers()
+            self.wfile.write(open("main.html").read().encode("utf-8"))
+        elif self.path in good_paths:
             self.send_response(200)
             self.send_header("content-type", "text/html")
             self.end_headers()
@@ -53,9 +58,20 @@ class WebServerHandler(BaseHTTPRequestHandler):
         self.send_error(500, "ERROR {}".format(self.path))
 
 def main():
+    import sys
+    if len(sys.argv) < 2:
+        print("Wrong number of arguments, please specify a port")
+        return
+
+    port = 0
+    try:
+        port = int(sys.argv[1])
+    except:
+        print("Port given did not convert to integer, please supply a port.. like 8080..")
+        return
+
     while True:
         try:
-            port = 8081
             print("Serving on port {}".format(port))
             server = HTTPServer(('', port), WebServerHandler)
             server.serve_forever()
