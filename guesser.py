@@ -97,7 +97,7 @@ class LetterAtIndexMustBeTwoDifferentThings(Exception):
         self.first_must_be = first_must_be
         self.second_must_be = second_must_be
 
-class LetterAtIndexMustBeAndAlsoCannotBeTheSameThing(Exception):
+class LetterAtIndexMustBeAndAlsoCannotBe(Exception):
     def __init__(self, must_be, cannot_be):
         self.must_be = must_be
         self.cannot_be = cannot_be
@@ -139,7 +139,7 @@ class Batch:
             if mb.index in index_to_must_be:
                 current = index_to_must_be[mb.index]
                 if current.letter != mb.letter:
-                    raise LetterAtIndexMustBeTwoDifferentThings(index, current, mb)
+                    raise LetterAtIndexMustBeTwoDifferentThings(current, mb)
             else:
                 index_to_must_be[mb.index] = mb
 
@@ -149,7 +149,7 @@ class Batch:
                 index_to_cannot_be_letters[cb.index].append(cb.letter)
             else:
                 if cb.index in index_to_must_be:
-                    raise LetterAtIndexMustBeAndAlsoCannotBeTheSameThing(index, index_to_must_be[cb.index], cb)
+                    raise LetterAtIndexMustBeAndAlsoCannotBe(index, index_to_must_be[cb.index], cb)
                 index_to_cannot_be_letters[cb.index] = [cb.letter]
 
         def criterion(word):
@@ -348,26 +348,26 @@ def test_letter_at_index_two_different_things_contradiction():
         batch.congeal()
         assert(False)
     except LetterAtIndexMustBeTwoDifferentThings as cont:
-        assert(cont.first_must_be.index == 1)
+        assert(cont.first_must_be.index == 2)
         assert(cont.first_must_be.letter == 'B')
-        assert(cont.second_must_be.index == 1)
+        assert(cont.second_must_be.index == 2)
         assert(cont.second_must_be.letter == 'Q')
 
 
-def test_letter_at_index_two_different_things_contradiction():
+def test_letter_must_be_and_also_cannot_be():
     batch = Batch(
-        must_be = [MustBe(2, 'B')],
-        cannot_be = [CannotBe(2, 'B')]
+        must_be = [MustBe(3, 'B')],
+        cannot_be = [CannotBe(3, 'B')]
     )
 
     try:
         batch.congeal()
         assert(False)
-    except LetterAtIndexMustBeTwoDifferentThings as cont:
-        assert(cont.first_must_be.index == 1)
-        assert(cont.first_must_be.letter == 'B')
-        assert(cont.second_must_be.index == 1)
-        assert(cont.second_must_be.letter == 'Q')
+    except LetterAtIndexMustBeAndAlsoCannotBe as cont:
+        assert(cont.must_be.index == 3)
+        assert(cont.must_be.letter == 'B')
+        assert(cont.cannot_be.index == 3)
+        assert(cont.cannot_be.letter == 'B')
 
 test_sets_of_conclusions()
 test_congeal_function()
