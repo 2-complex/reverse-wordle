@@ -339,6 +339,35 @@ def test_at_least_count_contradiction():
         assert(cont.at_least.count == 1)
 
 
+def test_letter_at_index_two_different_things_contradiction():
+    batch = Batch(
+        must_be = [MustBe(2, 'B'), MustBe(2, 'Q')]
+    )
+
+    try:
+        batch.congeal()
+        assert(False)
+    except LetterAtIndexMustBeTwoDifferentThings as cont:
+        assert(cont.first_must_be.index == 1)
+        assert(cont.first_must_be.letter == 'B')
+        assert(cont.second_must_be.index == 1)
+        assert(cont.second_must_be.letter == 'Q')
+
+
+def test_letter_at_index_two_different_things_contradiction():
+    batch = Batch(
+        must_be = [MustBe(2, 'B')],
+        cannot_be = [CannotBe(2, 'B')]
+    )
+
+    try:
+        batch.congeal()
+        assert(False)
+    except LetterAtIndexMustBeTwoDifferentThings as cont:
+        assert(cont.first_must_be.index == 1)
+        assert(cont.first_must_be.letter == 'B')
+        assert(cont.second_must_be.index == 1)
+        assert(cont.second_must_be.letter == 'Q')
 
 test_sets_of_conclusions()
 test_congeal_function()
@@ -347,3 +376,4 @@ test_criterion()
 test_criterion2()
 test_exact_count_contradiction()
 test_at_least_count_contradiction()
+test_letter_at_index_two_different_things_contradiction()
