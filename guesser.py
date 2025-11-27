@@ -1,7 +1,7 @@
 import random
 
 def get_words():
-    with open("words.txt") as f:
+    with open("common_words.txt") as f:
         return f.read().split()
 
 lexicon = sorted(list(map(lambda x: x.upper(), get_words())))
