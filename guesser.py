@@ -103,7 +103,7 @@ class LetterAtIndexMustBeAndAlsoCannotBeTheSameThing(Exception):
         self.cannot_be = cannot_be
 
 class Batch:
-    def __init__(self, exactly, at_least, must_be, cannot_be):
+    def __init__(self, exactly = [], at_least = [], must_be = [], cannot_be = []):
         self.exactly = exactly
         self.at_least = at_least
         self.must_be = must_be
@@ -311,10 +311,9 @@ def test_criterion2():
 
 
 def test_exact_count_contradiction():
-    batch = draw_conclusions([
-        {'word': 'AAAAA', 'score': [1, 0, 0, 0, 0]},
-        {'word': 'AAAAA', 'score': [1, 1, 0, 0, 0]},
-    ])
+    batch = Batch(
+        exactly=[Exactly('A', 1), Exactly('A', 2)],
+    )
 
     try:
         batch.congeal()
@@ -325,17 +324,19 @@ def test_exact_count_contradiction():
 
 
 def test_at_least_count_contradiction():
-    batch = draw_conclusions([
-        {'word': 'THREE', 'score': [0, 0, 0, 1, 1]},
-        {'word': 'FLECK', 'score': [0, 0, 0, 0, 0]},
-    ])
+    batch = Batch(
+        exactly=[Exactly('A', 0)],
+        at_least=[AtLeast('A', 1)],
+    )
 
     try:
         batch.congeal()
         assert(False)
-    except LetterExactCountsContradict as cont:
-        assert(cont.first_exactly.letter == 'A')
-        assert(cont.second_exactly.letter == 'A')
+    except LetterExactCountContradictsMinimum as cont:
+        assert(cont.exactly.letter == 'A')
+        assert(cont.exactly.count == 0)
+        assert(cont.at_least.letter == 'A')
+        assert(cont.at_least.count == 1)
 
 
 
@@ -345,3 +346,4 @@ test_congeal_function_2()
 test_criterion()
 test_criterion2()
 test_exact_count_contradiction()
+test_at_least_count_contradiction()
