@@ -83,15 +83,15 @@ class CannotBe(Conclusion):
         return hash(("CannotBe", self.index, self.letter))
 
 
-class ConclusionException(Exception):
+class Contradiction(Exception):
     def sentence(self, guesses):
         return "Standin sentence"
 
     def get_cites(self):
-        return 
+        pass
 
 
-class LetterExactCountsContradict(ConclusionException):
+class LetterExactCountsContradict(Contradiction):
     def __init__(self, first_exactly, second_exactly):
         self.first_exactly = first_exactly
         self.second_exactly = second_exactly
@@ -99,7 +99,7 @@ class LetterExactCountsContradict(ConclusionException):
     def get_cites(self):
         return self.first_exactly.cites + self.second_exactly.cites
 
-class LetterExactCountContradictsMinimum(ConclusionException):
+class LetterExactCountContradictsMinimum(Contradiction):
     def __init__(self, exactly, at_least):
         self.exactly = exactly
         self.at_least = at_least
@@ -107,7 +107,7 @@ class LetterExactCountContradictsMinimum(ConclusionException):
     def get_cites(self):
         return self.exactly.cites + self.at_least.cites
 
-class LetterAtIndexMustBeTwoDifferentThings(ConclusionException):
+class LetterAtIndexMustBeTwoDifferentThings(Contradiction):
     def __init__(self, first_must_be, second_must_be):
         self.first_must_be = first_must_be
         self.second_must_be = second_must_be
@@ -115,7 +115,7 @@ class LetterAtIndexMustBeTwoDifferentThings(ConclusionException):
     def get_cites(self):
         return self.first_must_be.cites + self.second_must_be.cites
 
-class LetterAtIndexMustBeAndAlsoCannotBe(ConclusionException):
+class LetterAtIndexMustBeAndAlsoCannotBe(Contradiction):
     def __init__(self, must_be, cannot_be):
         self.must_be = must_be
         self.cannot_be = cannot_be
@@ -236,27 +236,20 @@ def can_eliminate_letter(letter, guess_word, score):
     return True
 
 def guess(guesses_so_far):
-    s = set(lexicon)
+    batch = draw_conclusions(guesses_so_far)
+    criterion = None
+    try:
+        criterion = batch.congeal()
+    except Contradiction as cont:
+        return {
+            "title":"Something's not right",
+            "message": cont.sentence(guesses_so_far),
+            "cites": cont.get_cites()
+        }
 
-    for guess in guesses_so_far:
-        def is_viable(candidate_word):
-            for i in range(0, 5):
-                if guess['score'][i] == 0 and can_eliminate_letter(guess['word'][i], guess['word'], guess['score']) and guess['word'][i] in candidate_word:
-                    return False
+    remaining_choices = list(filter(criterion, lexicon))
 
-                if guess['score'][i] == 1 and guess['word'][i] != candidate_word[i]:
-                    return False
-
-                if guess['score'][i] == 2 and guess['word'][i] not in candidate_word:
-                    return False
-
-                if guess['score'][i] == 2 and guess['word'][i] == candidate_word[i]:
-                    return False
-            return True
-
-        s = set(filter(is_viable, s))
-
-    if len(s) == 0:
+    if len(remaining_choices) == 0:
         return {
             "title":"Something's not right",
             "message": "I can eliminate all words based on these scores, please reexamine scores and resubmit"
@@ -278,7 +271,7 @@ def guess(guesses_so_far):
             "gameover":True
         }
 
-    return {"next": random.choice(list(s))}
+    return {"next": random.choice(list(remaining_choices))}
 
 
 def test_sets_of_conclusions():
