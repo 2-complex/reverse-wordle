@@ -4,24 +4,42 @@ def get_words():
     with open("words.txt") as f:
         return f.read().split()
 
-words = sorted(list(map(lambda x: x.upper(), get_words())))
+lexicon = sorted(list(map(lambda x: x.upper(), get_words())))
 
-def num_to_indicator(n):
-    D = {0: "incorrect", 1: "correct", 2: "misplaced"}
-    return D.get(n, "WEIRD")
+def can_eliminate_letter(letter, guess_word, score):
+    for i in range(0, 5):
+        if guess_word[i] == letter and score[i] != 0:
+            return False
+    return True
 
-def guess(guesses):
+def guess(guesses_so_far):
+    s = set(lexicon)
+
+    for guess in guesses_so_far:
+        def is_viable(candidate_word):
+            for i in range(0, 5):
+                if guess['score'][i] == 0 and can_eliminate_letter(guess['word'][i], guess['word'], guess['score']) and guess['word'][i] in candidate_word:
+                    return False
+
+                if guess['score'][i] == 1 and guess['word'][i] != candidate_word[i]:
+                    return False
+
+                if guess['score'][i] == 2 and guess['word'][i] not in candidate_word:
+                    return False
+
+                if guess['score'][i] == 2 and guess['word'][i] == candidate_word[i]:
+                    return False
+            return True
+
+        s = set(filter(is_viable, s))
+
+    if len(s) == 0:
+        return {
+            "title":"Something's not right",
+            "message": "I can eliminate all words based on these scores, please reexamine scores and resubmit"
+        }
+
     cites = []
-    for j, guess in enumerate(guesses):
-        word = guess["word"]
-        score = guess["score"]
-        print("word: {}".format(word, score))
-        for i in range(0, 5):
-            print(" {} : {}".format(word[i], num_to_indicator(score[i])))
-            if score[i] == 2 and word[i] in "AEIOU":
-                cites.append((j, i))
-        print("")
-
     if len(cites) > 0:
         return {
             "title":"Something's not right",
@@ -29,7 +47,7 @@ def guess(guesses):
             "cites":cites
         }
 
-    if len(guesses) > 0 and guesses[-1]["score"] == 5*[1]:
+    if len(guesses_so_far) > 0 and guesses_so_far[-1]["score"] == 5*[1]:
         return {
             "title":"Thank you",
             "message": "Word guessed",
@@ -37,4 +55,4 @@ def guess(guesses):
             "gameover":True
         }
 
-    return {"next": random.choice(words)}
+    return {"next": random.choice(list(s))}

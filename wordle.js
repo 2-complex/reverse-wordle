@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () =>
     let $title = $("<div>").text("Welcome to Reverse Wordle").addClass("dialog-title")
     $controls.append($title)
 
-    let $dialog_body = $("<div>").html("In ordinary Wordle, the computer picks a word, and you guess.<br/><br/>In this game, you pick a word, and the computer guesses.<br/><br/>So, pick a word, commit to it mentally, and then hit the next button :)").addClass("dialog-body");
+    let $dialog_body = $("<div>").html("In ordinary Wordle, the computer picks a word, and you guess.<br/><br/>In this game, you pick a word, and the computer guesses.<br/><br/>So, pick a word, commit to it, write it down, and then hit the next button to get the first guess :)").addClass("dialog-body");
     $controls.append($dialog_body)
 
     $control_buttons = $("<div>").addClass("control-buttons");
@@ -84,10 +84,13 @@ document.addEventListener('DOMContentLoaded', () =>
                     }
                     else
                     {
-                        for( let i = 0; i < response.cites.length; i++ )
+                        if (response.cites)
                         {
-                            let cite = response.cites[i];
-                            $("#let-" + cite[0] + "-" + cite[1]).addClass("cite");
+                            for( let i = 0; i < response.cites.length; i++ )
+                            {
+                                let cite = response.cites[i];
+                                $("#let-" + cite[0] + "-" + cite[1]).addClass("cite");
+                            }
                         }
 
                         $title.text(response.title);
