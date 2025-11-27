@@ -82,25 +82,46 @@ class CannotBe(Conclusion):
     def __hash__(self):
         return hash(("CannotBe", self.index, self.letter))
 
-class LetterExactCountsContradict(Exception):
+
+class ConclusionException(Exception):
+    def sentence(self, guesses):
+        return "Standin sentence"
+
+    def get_cites(self):
+        return 
+
+
+class LetterExactCountsContradict(ConclusionException):
     def __init__(self, first_exactly, second_exactly):
         self.first_exactly = first_exactly
         self.second_exactly = second_exactly
 
-class LetterExactCountContradictsMinimum(Exception):
+    def get_cites(self):
+        return self.first_exactly.cites + self.second_exactly.cites
+
+class LetterExactCountContradictsMinimum(ConclusionException):
     def __init__(self, exactly, at_least):
         self.exactly = exactly
         self.at_least = at_least
 
-class LetterAtIndexMustBeTwoDifferentThings(Exception):
+    def get_cites(self):
+        return self.exactly.cites + self.at_least.cites
+
+class LetterAtIndexMustBeTwoDifferentThings(ConclusionException):
     def __init__(self, first_must_be, second_must_be):
         self.first_must_be = first_must_be
         self.second_must_be = second_must_be
 
-class LetterAtIndexMustBeAndAlsoCannotBe(Exception):
+    def get_cites(self):
+        return self.first_must_be.cites + self.second_must_be.cites
+
+class LetterAtIndexMustBeAndAlsoCannotBe(ConclusionException):
     def __init__(self, must_be, cannot_be):
         self.must_be = must_be
         self.cannot_be = cannot_be
+
+    def get_cites(self):
+        return self.must_be.cites + self.cannot_be.cites
 
 class Batch:
     def __init__(self, exactly = [], at_least = [], must_be = [], cannot_be = []):
