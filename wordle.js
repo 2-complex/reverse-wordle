@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
             if( response.next_guess )
             {
-                $dialog = make_dialog("Excellent", "Score the guess and hit next again", "Next", next_guess_please, false);
+                $dialog = make_dialog(response.title, response.message, "Next", next_guess_please, false);
                 $guesses.append(add_guess(response.next_guess));
             }
             else

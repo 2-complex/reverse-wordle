@@ -1,10 +1,13 @@
 import random
 
-def get_words():
-    with open("common_words.txt") as f:
-        return f.read().split()
+def get_words(path):
+    def words_from_file(p):
+        with open(p) as f:
+            return f.read().split()
+    return sorted(list(map(lambda x: x.upper(), words_from_file(path))))
 
-lexicon = sorted(list(map(lambda x: x.upper(), get_words())))
+common_lexicon = get_words("common_words.txt")
+less_common_lexicon = get_words("less_common_words.txt")
 
 
 def counts(word):
@@ -28,7 +31,7 @@ class Exactly(Conclusion):
 
     def __repr__(self):
         if self.count == 0:
-            return "'{}' not in answer".format(self.letter)
+            return "'{}' not present".format(self.letter)
         elif self.count == 1:
             return "'{}' occurs exactly once".format(self.letter)
         else:
@@ -46,7 +49,12 @@ class AtLeast(Conclusion):
         self.count = count
 
     def __repr__(self):
-        return "'{}' occurs at least {}".format(self.letter, self.count)
+        if self.count == 0:
+            return "'{}' occurs at least 0 times, which is vacuous, that's weird".format(self.letter)
+        if self.count == 1:
+            return "'{}' occurs at least once".format(self.letter)
+        if self.count == 1:
+            return "'{}' occurs at {} times".format(self.letter, self.count)
 
     def __eq__(self, other):
         return type(other) is type(self) and self.count == other.count and self.letter == other.letter
@@ -60,7 +68,7 @@ class MustBe(Conclusion):
         self.letter = letter
 
     def __repr__(self):
-        return "letter in position {} is '{}'".format(self.index, self.letter)
+        return "'{}' in position {}".format(self.letter, self.index)
 
     def __eq__(self, other):
         return type(other) is type(self) and self.index == other.index and self.letter == other.letter
@@ -188,11 +196,13 @@ class Batch:
 
         index_to_cannot_be_letters = {}
         for cb in self.cannot_be:
+            if cb.index in index_to_must_be:
+                if index_to_must_be[cb.index].letter == cb.letter:
+                    raise LetterAtIndexMustBeAndAlsoCannotBe(index_to_must_be[cb.index], cb)
+
             if cb.index in index_to_cannot_be_letters:
                 index_to_cannot_be_letters[cb.index].append(cb.letter)
             else:
-                if cb.index in index_to_must_be:
-                    raise LetterAtIndexMustBeAndAlsoCannotBe(index_to_must_be[cb.index], cb)
                 index_to_cannot_be_letters[cb.index] = [cb.letter]
 
         def criterion(word):
@@ -257,8 +267,28 @@ def can_eliminate_letter(letter, guess_word, score):
             return False
     return True
 
+import string
+def is_valid_word(target_word):
+    if len(target_word) != 5:
+        return False
+
+    for c in target_word:
+        if c not in string.ascii_uppercase:
+            return False
+
+    return True
+
 
 def reveal(guesses_so_far, target_word):
+    target_word = target_word.upper()
+    if not is_valid_word(target_word):
+        return {
+            "title":"Invalid Input",
+            "message": "Words must be five-letters, A-Z.  What was your word?",
+            "entry": True,
+            "gameover":False,
+        }
+
     cites = []
     for row, guess in enumerate(guesses_so_far):
         batch = draw_conclusions([guess], row)
@@ -268,7 +298,7 @@ def reveal(guesses_so_far, target_word):
     if len(cites) > 0:
         return {
             "title":"Something's not right",
-            "message": "Check the letters above?  Seems like they contradict that word.  We can keep playing if you adjust and hit next",
+            "message": "Check the letters above?  They seem to contradict {}.  We can keep playing, if you adjust and hit Next".format(target_word),
             "gameover":False,
             "cites":cites
         }
@@ -285,38 +315,39 @@ def guess(guesses_so_far):
     try:
         criterion = batch.congeal()
     except Contradiction as cont:
+        print(type(cont))
         return {
             "title":"Something's not right",
             "message": cont.sentence(guesses_so_far),
             "cites": cont.get_cites()
         }
 
-    remaining_choices = list(filter(criterion, lexicon))
+    arcane = False
+    remaining_choices = list(filter(criterion, common_lexicon))
+
+    if len(remaining_choices) == 0:
+        arcane = True
+        remaining_choices = list(filter(criterion, less_common_lexicon))
 
     if len(remaining_choices) == 0:
         return {
             "title":"I give up!",
-            "message": "What was your word?",
+            "message":"What was your word?",
             "entry":True,
-        }
-
-    cites = []
-    if len(cites) > 0:
-        return {
-            "title":"Something's not right",
-            "message": "There appear to be yellow vowels.  Remove yellow vowels.  Then hit next",
-            "cites":cites
         }
 
     if len(guesses_so_far) > 0 and guesses_so_far[-1]["score"] == 5*[1]:
         return {
-            "title":"Thank you",
-            "message": "Word guessed",
+            "title":"Word guessed",
+            "message": "Thanks for playing",
             "cites":[],
             "gameover":True
         }
 
-    return {"next_guess": random.choice(list(remaining_choices))}
+    return {
+        "title":"Excellent",
+        "message":"Next, score the guess.  Click the letters to change their color.",
+        "next_guess": random.choice(list(remaining_choices))}
 
 
 def test_sets_of_conclusions():
@@ -367,6 +398,14 @@ def test_criterion2():
         {'word': 'LATHE', 'score': [0, 1, 1, 0, 1]},
     ])
     assert(set(filter(batch.congeal(), test_words)) == {"MATTE"})
+
+
+def test_criterion_two_guesses():
+    batch = draw_conclusions([
+        {'word': 'COALS', 'score': [0, 0, 2, 1, 0]},
+        {'word': 'ADULT', 'score': [1, 0, 0, 1, 0]},
+    ])
+    assert(set(filter(batch.congeal(), test_words)) == {"APPLE"})
 
 
 def test_exact_count_contradiction():
@@ -436,3 +475,4 @@ test_criterion2()
 test_exact_count_contradiction()
 test_at_least_count_contradiction()
 test_letter_at_index_two_different_things_contradiction()
+test_criterion_two_guesses()
