@@ -126,6 +126,15 @@ button {
     text-align: left;
 }
 
+.dialog-input {
+    padding: 5px;
+    font-size: 25;
+    text-align: left;
+    width: 5.5em;
+    margin-right: 20px;
+    text-transform: uppercase;
+}
+
 .control-buttons {
     padding: 5px;
     text-align: right;

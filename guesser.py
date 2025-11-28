@@ -35,8 +35,10 @@ def guess(guesses_so_far):
 
     if len(s) == 0:
         return {
-            "title":"Something's not right",
-            "message": "I can eliminate all words based on these scores, please reexamine scores and resubmit"
+            "title":"I give up!",
+            "message": "What was your word?",
+            "gameover":True,
+            "entry":True,
         }
 
     cites = []
@@ -55,4 +57,4 @@ def guess(guesses_so_far):
             "gameover":True
         }
 
-    return {"next": random.choice(list(s))}
+    return {"next_guess": random.choice(list(s))}

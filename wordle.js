@@ -63,6 +63,11 @@ document.addEventListener('DOMContentLoaded', () =>
         $controls.addClass("pop-out-element")
     }
 
+    function reveal_word(word)
+    {
+        alert(word)
+    }
+
     $next_button.click(function() {
         clear_dialog()
         $.ajax({
@@ -76,25 +81,46 @@ document.addEventListener('DOMContentLoaded', () =>
                     $controls.removeClass("pop-out-element")
                     $controls.addClass("pop-in-element")
                     $(".letter").removeClass("cite");
-                    if( response.next )
+                    if( response.next_guess )
                     {
                         $title.text("Excellent");
                         $dialog_body.text("Score the guess and hit next again");
-                        $guesses.append(add_guess(response.next));
+                        $guesses.append(add_guess(response.next_guess));
                     }
                     else
                     {
-                        if (response.cites)
-                        {
-                            for( let i = 0; i < response.cites.length; i++ )
-                            {
-                                let cite = response.cites[i];
-                                $("#let-" + cite[0] + "-" + cite[1]).addClass("cite");
-                            }
-                        }
-
                         $title.text(response.title);
                         $dialog_body.text(response.message);
+
+                        if (response.entry)
+                        {
+                            let $input = $('<input maxlength="5">').addClass("dialog-input");
+                            $controls.append($input);
+                            let $enter_button = $("<button>").addClass("next").text("enter");
+
+                            $input.keydown(function(evt) {
+                                if (evt.which == 13)
+                                {
+                                    reveal_word($input.val());
+                                }
+                            });
+
+                            $enter_button.click(function() {
+                                reveal_word($input.val());
+                            });
+                            $controls.append($enter_button);
+                        }
+                        else
+                        {
+                            if (response.cites)
+                            {
+                                for( let i = 0; i < response.cites.length; i++ )
+                                {
+                                    let cite = response.cites[i];
+                                    $("#let-" + cite[0] + "-" + cite[1]).addClass("cite");
+                                }
+                            }
+                        }
                     }
 
                     if( response.gameover )
