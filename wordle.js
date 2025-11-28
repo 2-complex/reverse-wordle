@@ -32,92 +32,125 @@ function add_guess(word)
     guesses.push(new_guess);
 
     letter_buttons = word.substring(0, 5).split('').map((c, index) => letter_button(c, new_guess.score, row, index));
-    setTimeout(function() { letter_buttons[0].focus() }, 10);
+    setTimeout(function() { letter_buttons[0].focus() }, 11);
 
     return $("<div>").addClass("guess").append(letter_buttons);
+}
+
+function make_dialog(title, message, button_text, handler, text_input)
+{
+    let $dialog = $("<div id='controls'>").addClass("controls");
+    let $title = $("<div>").text(title).addClass("dialog-title");
+    $dialog.append($title);
+    let $dialog_body = $("<div>").html(message).addClass("dialog-body");
+    $dialog.append($dialog_body);
+
+    $control_buttons = $("<div>").addClass("control-buttons");
+    let $input = text_input ? $('<input maxlength="5">').addClass("dialog-input") : null;
+
+    if( text_input )
+    {
+        $dialog.append($input);
+        let $enter_button = $("<button>").addClass("next").text("enter");
+
+        $input.keydown(function(evt) {
+            if (evt.which == 13)
+            {
+                $input.remove();
+                $control_buttons.remove();
+                handler($input.val());
+            }
+        });
+
+        setTimeout(function() { $input.focus() }, 9);
+    }
+
+    $dialog.append($control_buttons);
+    if( button_text )
+    {
+        let $button = $("<button>").addClass("next").text(button_text);
+        $control_buttons.append($button);
+        $button.click(function()
+        {
+            $button.remove();
+            if( text_input )
+            {
+                let w = $input.val();
+                $input.remove();
+                $control_buttons.remove();
+                handler(w);
+            }
+            else
+            {
+                handler();
+            }
+        });
+        if( !text_input )
+        {
+            setTimeout(function() { $button.focus() }, 9);
+        }
+    }
+
+    $("#main").append($dialog);
+    $dialog.removeClass("pop-out-element");
+    $dialog.addClass("pop-in-element");
+
+    return $dialog;
 }
 
 document.addEventListener('DOMContentLoaded', () =>
 {
     let $guesses = $("<div id='guesses'>").addClass("guesses");
-    let $controls = $("<div id='controls'>").addClass("controls");
-
-    let $title = $("<div>").text("Welcome to Reverse Wordle").addClass("dialog-title")
-    $controls.append($title)
-
-    let $dialog_body = $("<div>").html("In ordinary Wordle, the computer picks a word, and you guess.<br/><br/>In this game, you pick a word, and the computer guesses.<br/><br/>So, pick a word, commit to it, write it down, and then hit the next button to get the first guess :)").addClass("dialog-body");
-    $controls.append($dialog_body)
-
-    $control_buttons = $("<div>").addClass("control-buttons");
-    $("#main").append([$guesses, $controls]);
-    $controls.append($control_buttons);
-
-    let $next_button = $("<button>").addClass("next").text("next");
-    $control_buttons.append($next_button);
-
-    setTimeout(function() { $next_button.focus() }, 10);
+    $("#main").append($guesses);
 
     function clear_dialog()
     {
-        $controls.removeClass("pop-in-element")
-        $controls.addClass("pop-out-element")
+        $dialog.removeClass("pop-in-element");
+        $dialog.addClass("pop-out-element");
     }
 
     function handle_response(response)
     {
         setTimeout(function() {
-            $controls.removeClass("pop-out-element")
-            $controls.addClass("pop-in-element")
             $(".letter").removeClass("cite");
+
+            $dialog.remove();
+
             if( response.next_guess )
             {
-                $title.text("Excellent");
-                $dialog_body.text("Score the guess and hit next again");
+                $dialog = make_dialog("Excellent", "Score the guess and hit next again", "Next", next_guess_please, false);
                 $guesses.append(add_guess(response.next_guess));
             }
             else
             {
-                $title.text(response.title);
-                $dialog_body.text(response.message);
-
                 if (response.entry)
                 {
-                    let $input = $('<input maxlength="5">').addClass("dialog-input");
-                    $controls.append($input);
-                    let $enter_button = $("<button>").addClass("next").text("enter");
-
-                    $input.keydown(function(evt) {
-                        if (evt.which == 13)
-                        {
-                            $input.remove();
-                            $enter_button.remove();
-                            reveal_word($input.val());
-                        }
-                    });
-
-                    $enter_button.click(function() {
-                        $input.remove();
-                        $enter_button.remove();
-                        reveal_word($input.val());
-                    });
-                    $controls.append($enter_button);
+                    $dialog = make_dialog(response.title, response.message, "Enter", reveal_word, true);
                 }
                 else
                 {
-                    if (response.cites)
+                    if (response.gameover)
                     {
-                        for( let i = 0; i < response.cites.length; i++ )
-                        {
-                            let cite = response.cites[i];
-                            $("#let-" + cite[0] + "-" + cite[1]).addClass("cite");
-                        }
+                        $dialog = make_dialog(response.title, response.message, "", null, false);
+                    }
+                    else
+                    {
+                        $dialog = make_dialog(response.title, response.message, "Next", next_guess_please, false);
+                    }
+                }
+
+                if (response.cites)
+                {
+                    for( let i = 0; i < response.cites.length; i++ )
+                    {
+                        let cite = response.cites[i];
+                        $("#let-" + cite[0] + "-" + cite[1]).addClass("cite");
                     }
                 }
             }
 
             if( response.gameover )
             {
-                $next_button.remove();
                 $(".letter").off("click");
                 $(".letter").prop('disabled', true);
             }
@@ -136,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () =>
         });
     }
 
-    $next_button.click(function() {
+    function next_guess_please() {
         clear_dialog()
         $.ajax({
             type: "POST",
@@ -145,6 +178,13 @@ document.addEventListener('DOMContentLoaded', () =>
             data: JSON.stringify({guesses:guesses}),
             success: handle_response,
         });
-    });
-    $controls.addClass("pop-in-element")
+    }
+
+    let $dialog = make_dialog(
+        "Welcome to Reverse Wordle",
+        "In ordinary Wordle, the computer picks a word, and you guess.<br/><br/>In this game, you pick a word, and the computer guesses.<br/><br/>So, pick a word, commit to it, write it down, and then hit the Next button to get the first guess :)",
+        "Next",
+        next_guess_please,
+        false
+    );
 });

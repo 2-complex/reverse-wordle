@@ -85,7 +85,7 @@ class CannotBe(Conclusion):
 
 class Contradiction(Exception):
     def sentence(self, guesses):
-        return "Standin sentence"
+        return "The above letters seem to contradict"
 
     def get_cites(self):
         pass
@@ -133,6 +133,28 @@ class Batch:
     def all(self):
         return set(self.exactly + self.at_least + self.must_be + self.cannot_be)
 
+
+    def check_word(self, word):
+        contradictions = []
+        for ex in self.exactly:
+            if word.count(ex.letter) != ex.count:
+                contradictions.append(ex)
+
+        for atl in self.at_least:
+            if word.count(atl.letter) < atl.count:
+                contradictions.append(atl)
+
+        for mb in self.must_be:
+            if word[mb.index] != mb.letter:
+                contradictions.append(mb)
+
+        for cb in self.cannot_be:
+            if word[cb.index] == cb.letter:
+                contradictions.append(cb)
+
+        return contradictions
+
+
     def congeal(self):
         letter_to_exactly = {}
         for ex in self.exactly:
@@ -170,7 +192,7 @@ class Batch:
                 index_to_cannot_be_letters[cb.index].append(cb.letter)
             else:
                 if cb.index in index_to_must_be:
-                    raise LetterAtIndexMustBeAndAlsoCannotBe(index, index_to_must_be[cb.index], cb)
+                    raise LetterAtIndexMustBeAndAlsoCannotBe(index_to_must_be[cb.index], cb)
                 index_to_cannot_be_letters[cb.index] = [cb.letter]
 
         def criterion(word):
@@ -194,21 +216,21 @@ class Batch:
 
         return criterion
 
-def draw_conclusions(guesses_so_far):
+def draw_conclusions(guesses, row = 0):
     exactly = []
     at_least = []
     must_be = []
     cannot_be = []
 
-    for j, guess in enumerate(guesses_so_far):
+    for j, guess in enumerate(guesses):
         word = guess['word']
         score = guess['score']
 
         for i in range(0, 5):
             if score[i] == 1:
-                must_be.append(MustBe(i, word[i]).at_cites([(j,i)]))
+                must_be.append(MustBe(i, word[i]).at_cites([(row+j,i)]))
             if score[i] == 2:
-                cannot_be.append(CannotBe(i, word[i]).at_cites([(j,i)]))
+                cannot_be.append(CannotBe(i, word[i]).at_cites([(row+j,i)]))
 
         for letter in set(word):
             cites = []
@@ -216,7 +238,7 @@ def draw_conclusions(guesses_so_far):
             some_are_gray = False
             count = 0
             for i in indices:
-                cites.append((j,i))
+                cites.append((row+j,i))
                 if score[i] == 0:
                     some_are_gray = True
                 else:
@@ -237,11 +259,25 @@ def can_eliminate_letter(letter, guess_word, score):
 
 
 def reveal(guesses_so_far, target_word):
-    return {
-        "title":"I still give up!",
-        "message": word,
-        "gameover":True,
-    }
+    cites = []
+    for row, guess in enumerate(guesses_so_far):
+        batch = draw_conclusions([guess], row)
+        for c in batch.check_word(target_word):
+            cites += c.cites
+
+    if len(cites) > 0:
+        return {
+            "title":"Something's not right",
+            "message": "Check the letters above?  Seems like they contradict that word.  We can keep playing if you adjust and hit next",
+            "gameover":False,
+            "cites":cites
+        }
+    else:
+        return {
+            "title": "You're right!",
+            "message": "{} meets all those criteria".format(target_word),
+            "gameover":True,
+        }
 
 def guess(guesses_so_far):
     batch = draw_conclusions(guesses_so_far)
@@ -261,7 +297,6 @@ def guess(guesses_so_far):
         return {
             "title":"I give up!",
             "message": "What was your word?",
-            "gameover":True,
             "entry":True,
         }
 
