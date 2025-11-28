@@ -55,6 +55,30 @@ class WebServerHandler(BaseHTTPRequestHandler):
             self.wfile.write((json.dumps(guess)+"\n").encode("utf-8"))
             return
 
+        if self.path == "/reveal":
+            importlib.reload(guesser)
+            length = int(self.headers.get('content-length'))
+            post_data_bytes = self.rfile.read(length)
+            post_data_str = post_data_bytes.decode('utf-8')
+
+            try:
+                received_json = json.loads(post_data_str)
+            except json.JSONDecodeError:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'Invalid JSON received')
+                return
+
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('X-Custom-Header', 'MyValue')
+            self.end_headers()
+
+            guess = guesser.reveal(received_json["guesses"], received_json["word"])
+
+            self.wfile.write((json.dumps(guess)+"\n").encode("utf-8"))
+            return
+
         self.send_error(500, "ERROR {}".format(self.path))
 
 def main():

@@ -63,9 +63,77 @@ document.addEventListener('DOMContentLoaded', () =>
         $controls.addClass("pop-out-element")
     }
 
+    function handle_response(response)
+    {
+        setTimeout(function() {
+            $controls.removeClass("pop-out-element")
+            $controls.addClass("pop-in-element")
+            $(".letter").removeClass("cite");
+            if( response.next_guess )
+            {
+                $title.text("Excellent");
+                $dialog_body.text("Score the guess and hit next again");
+                $guesses.append(add_guess(response.next_guess));
+            }
+            else
+            {
+                $title.text(response.title);
+                $dialog_body.text(response.message);
+
+                if (response.entry)
+                {
+                    let $input = $('<input maxlength="5">').addClass("dialog-input");
+                    $controls.append($input);
+                    let $enter_button = $("<button>").addClass("next").text("enter");
+
+                    $input.keydown(function(evt) {
+                        if (evt.which == 13)
+                        {
+                            $input.remove();
+                            $enter_button.remove();
+                            reveal_word($input.val());
+                        }
+                    });
+
+                    $enter_button.click(function() {
+                        $input.remove();
+                        $enter_button.remove();
+                        reveal_word($input.val());
+                    });
+                    $controls.append($enter_button);
+                }
+                else
+                {
+                    if (response.cites)
+                    {
+                        for( let i = 0; i < response.cites.length; i++ )
+                        {
+                            let cite = response.cites[i];
+                            $("#let-" + cite[0] + "-" + cite[1]).addClass("cite");
+                        }
+                    }
+                }
+            }
+
+            if( response.gameover )
+            {
+                $next_button.remove();
+                $(".letter").off("click");
+                $(".letter").prop('disabled', true);
+            }
+        }, 300);
+    }
+
     function reveal_word(word)
     {
-        alert(word)
+        clear_dialog()
+        $.ajax({
+            type: "POST",
+            url: "/reveal",
+            dataType: 'json',
+            data: JSON.stringify({guesses:guesses, word:word}),
+            success: handle_response,
+        });
     }
 
     $next_button.click(function() {
@@ -75,62 +143,7 @@ document.addEventListener('DOMContentLoaded', () =>
             url: "/next",
             dataType: 'json',
             data: JSON.stringify({guesses:guesses}),
-            success: function(response)
-            {
-                setTimeout(function() {
-                    $controls.removeClass("pop-out-element")
-                    $controls.addClass("pop-in-element")
-                    $(".letter").removeClass("cite");
-                    if( response.next_guess )
-                    {
-                        $title.text("Excellent");
-                        $dialog_body.text("Score the guess and hit next again");
-                        $guesses.append(add_guess(response.next_guess));
-                    }
-                    else
-                    {
-                        $title.text(response.title);
-                        $dialog_body.text(response.message);
-
-                        if (response.entry)
-                        {
-                            let $input = $('<input maxlength="5">').addClass("dialog-input");
-                            $controls.append($input);
-                            let $enter_button = $("<button>").addClass("next").text("enter");
-
-                            $input.keydown(function(evt) {
-                                if (evt.which == 13)
-                                {
-                                    reveal_word($input.val());
-                                }
-                            });
-
-                            $enter_button.click(function() {
-                                reveal_word($input.val());
-                            });
-                            $controls.append($enter_button);
-                        }
-                        else
-                        {
-                            if (response.cites)
-                            {
-                                for( let i = 0; i < response.cites.length; i++ )
-                                {
-                                    let cite = response.cites[i];
-                                    $("#let-" + cite[0] + "-" + cite[1]).addClass("cite");
-                                }
-                            }
-                        }
-                    }
-
-                    if( response.gameover )
-                    {
-                        $next_button.remove();
-                        $(".letter").off("click");
-                        $(".letter").prop('disabled', true);
-                    }
-                }, 300);
-            },
+            success: handle_response,
         });
     });
     $controls.addClass("pop-in-element")

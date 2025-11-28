@@ -12,6 +12,13 @@ def can_eliminate_letter(letter, guess_word, score):
             return False
     return True
 
+def reveal(guesses_so_far, word):
+    return {
+        "title":"I still give up!",
+        "message": word,
+        "gameover":True,
+    }
+
 def guess(guesses_so_far):
     s = set(lexicon)
 
