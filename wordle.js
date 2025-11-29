@@ -1,4 +1,3 @@
-
 function letter_button(initial, score, row, col)
 {
     let $letter = $("<button id='let-" + row + "-" + col + "'>")
@@ -39,13 +38,13 @@ function add_guess(word)
 
 function make_dialog(title, message, button_text, handler, text_input)
 {
-    let $dialog = $("<div id='controls'>").addClass("controls");
+    let $dialog = $("<div>").addClass("dialog");
     let $title = $("<div>").text(title).addClass("dialog-title");
     $dialog.append($title);
     let $dialog_body = $("<div>").html(message).addClass("dialog-body");
     $dialog.append($dialog_body);
 
-    $control_buttons = $("<div>").addClass("control-buttons");
+    $button_container = $("<div>").addClass("button-container");
     let $input = text_input ? $('<input maxlength="5">').addClass("dialog-input") : null;
 
     if( text_input )
@@ -57,7 +56,7 @@ function make_dialog(title, message, button_text, handler, text_input)
             if (evt.which == 13)
             {
                 $input.remove();
-                $control_buttons.remove();
+                $button_container.remove();
                 handler($input.val());
             }
         });
@@ -65,11 +64,11 @@ function make_dialog(title, message, button_text, handler, text_input)
         setTimeout(function() { $input.focus() }, 9);
     }
 
-    $dialog.append($control_buttons);
+    $dialog.append($button_container);
     if( button_text )
     {
         let $button = $("<button>").addClass("next").text(button_text);
-        $control_buttons.append($button);
+        $button_container.append($button);
         $button.click(function()
         {
             $button.remove();
@@ -77,7 +76,7 @@ function make_dialog(title, message, button_text, handler, text_input)
             {
                 let w = $input.val();
                 $input.remove();
-                $control_buttons.remove();
+                $button_container.remove();
                 handler(w);
             }
             else

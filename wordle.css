@@ -1,15 +1,14 @@
 body {
     font-family: "Arial", Helvetica, sans-serif;
-    -webkit-user-select: none; /* Safari */
-    -moz-user-select: none;    /* Firefox */
-    -ms-user-select: none;     /* IE 10+ */
-    user-select: none;         /* Standard syntax */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .pop-in-element {
     transform: scale(0.1);
     animation: pop-in-bounce 0.2s forwards;
-    /* Optional: improve performance by hinting the browser */
     will-change: transform, opacity;
 }
 
@@ -18,12 +17,10 @@ body {
         opacity: 0;
         transform: scale(0.1);
     }
-    /* Expand a little beyond the final size */
     70% {
         opacity: 1;
         transform: scale(1.1);
     }
-    /* Shrink back to the final size */
     100% {
         opacity: 1;
         transform: scale(1);
@@ -42,12 +39,10 @@ body {
         opacity: 1;
         transform: scale(1);
     }
-    /* Expand a little beyond the final size */
     30% {
         opacity: 1;
         transform: scale(1.1);
     }
-    /* Shrink back to the final size */
     100% {
         opacity: 0;
         transform: scale(0.1);
@@ -55,8 +50,11 @@ body {
 }
 
 button:focus {
-  outline: 4px solid #aae; /* Adjust '4px' for thickness */
-  outline-offset: 0px; /* Optional: adds space between element and outline */
+    outline: 4px solid #aae;
+}
+
+input:focus {
+    outline: 4px solid #aae;
 }
 
 button {
@@ -65,15 +63,15 @@ button {
 }
 
 .guess {
-    width: 280px;
-    margin:5px;
+    width: 22.4rem;
+    margin: 5px;
 }
 
 .guesses {
     margin-bottom: 30px;
 }
 
-.controls {
+.dialog {
     width: 350px;
     padding: 3px;
     height: auto;
@@ -94,19 +92,37 @@ button {
 
 .letter {
     margin:3px;
-    font-size: 25;
-    width:50px;
-    height:50px;
+    font-size: 2.3rem;
+    width: 4rem;
+    height: 4rem;
     border-color: #bbb;
+}
+
+.correct {
+    background-color: #1ea61a;
+    border-color: #1ea61a;
+    color: white;
+}
+
+.misplaced {
+    background-color: yellow;
+    border-color: #ecec00;
+    color: black;
+}
+
+.incorrect {
+    background-color: white;
+    border-color: #ddd;
+    color: black;
 }
 
 .cite::after {
     content: "";
     position: absolute;
-    top: 10%;
-    left: 10%;
-    width: 80%;
-    height: 80%;
+    top: 5%;
+    left: 5%;
+    right: 5%;
+    bottom: 5%;
     outline: 3px;
     outline-style: solid;
     outline-color: #aa4b00bb;
@@ -131,30 +147,12 @@ button {
     font-size: 25;
     text-align: left;
     width: 5.5em;
-    margin-right: 20px;
+    margin: 10px;
     text-transform: uppercase;
 }
 
-.control-buttons {
+.button-container {
     padding: 5px;
     text-align: right;
-}
-
-.correct {
-    background-color: #1ea61a;
-    border: 0px;
-    color: white;
-}
-
-.misplaced {
-    background-color: yellow;
-    border-color: #ecec00;
-    color: black;
-}
-
-.incorrect {
-    background-color: white;
-    border-color: #ddd;
-    color: black;
 }
 

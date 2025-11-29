@@ -93,7 +93,7 @@ class CannotBe(Conclusion):
 
 class Contradiction(Exception):
     def sentence(self, guesses):
-        return "The above letters seem to contradict"
+        return "The above colors contradict"
 
     def get_cites(self):
         pass
@@ -284,7 +284,7 @@ def reveal(guesses_so_far, target_word):
     if not is_valid_word(target_word):
         return {
             "title":"Invalid Input",
-            "message": "Words must be five-letters, A-Z.  What was your word?",
+            "message": "Words must be five letters, A-Z.<br/><br/>What was your word?",
             "entry": True,
             "gameover":False,
         }
@@ -298,14 +298,14 @@ def reveal(guesses_so_far, target_word):
     if len(cites) > 0:
         return {
             "title":"Something's not right",
-            "message": "Check the letters above?  They seem to contradict {}.  We can keep playing, if you adjust and hit Next".format(target_word),
+            "message": "If you adjust the colors and hit Next, we can keep playing<br/><br/>I'll forget that you told me the answer was {}<br/><br/>You can even change your mind and pick a new word, as long as you re-color accordingly".format(target_word, target_word),
             "gameover":False,
             "cites":cites
         }
     else:
         return {
             "title": "You're right!",
-            "message": "{} meets all those criteria".format(target_word),
+            "message": "{} agrees with the above colors".format(target_word),
             "gameover":True,
         }
 
@@ -331,7 +331,7 @@ def guess(guesses_so_far):
 
     if len(remaining_choices) == 0:
         return {
-            "title":"I give up!",
+            "title":"I give up",
             "message":"What was your word?",
             "entry":True,
         }
