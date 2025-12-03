@@ -4,6 +4,14 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    margin: 0 auto;
+}
+
+.responsive-box {
+    aspect-ratio: 5/8;
+    width: auto;
+    height: 100%;
+    margin: 0 auto;
 }
 
 .pop-in-element {
@@ -19,7 +27,7 @@ body {
     }
     70% {
         opacity: 1;
-        transform: scale(1.1);
+        transform: scale(1.2);
     }
     100% {
         opacity: 1;
@@ -41,7 +49,7 @@ body {
     }
     30% {
         opacity: 1;
-        transform: scale(1.1);
+        transform: scale(1.2);
     }
     100% {
         opacity: 0;
@@ -50,11 +58,11 @@ body {
 }
 
 button:focus {
-    outline: 4px solid #aae;
+    outline: .3rem solid #aae;
 }
 
 input:focus {
-    outline: 4px solid #aae;
+    outline: .3rem solid #aae;
 }
 
 button {
@@ -63,38 +71,36 @@ button {
 }
 
 .guess {
-    width: 22.4rem;
-    margin: 5px;
+    width: 100%;
 }
 
 .guesses {
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
 }
 
 .dialog {
-    width: 350px;
-    padding: 3px;
+    width: 100%;
     height: auto;
-    margin: 5px;
     background-color: #dde;
 }
 
 .next {
-    font-size: 20px;
-    padding-top: 7px;
-    padding-bottom: 7px;
-    padding-left: 15px;
-    padding-right: 15px;
+    font-size: 2rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
     vertical-align: middle;
     text-align: center;
     border-color: #448;
 }
 
 .letter {
-    margin:3px;
-    font-size: 2.3rem;
-    width: 4rem;
-    height: 4rem;
+    aspect-ratio: 1;
+    margin: 3px;
+    font-size: 300%;
+    width: 18%;
+    height: auto;
     border-color: #bbb;
 }
 
@@ -126,19 +132,19 @@ button {
     outline: 3px;
     outline-style: solid;
     outline-color: #aa4b00bb;
-    border-radius: 50%; /* Makes a circle */
+    border-radius: 50%; /* circle */
 }
 
 .dialog-title {
-    padding: 5px;
-    font-size: 18;
+    padding: 1rem;
+    font-size: 2rem;
     font-weight: bold;
     text-align: left;
 }
 
 .dialog-body {
-    padding: 5px;
-    font-size: 16;
+    padding: 1rem;
+    font-size: 1.5rem;
     text-align: left;
 }
 
@@ -147,7 +153,7 @@ button {
     font-size: 25;
     text-align: left;
     width: 5.5em;
-    margin: 10px;
+    margin: 1rem;
     text-transform: uppercase;
 }
 
