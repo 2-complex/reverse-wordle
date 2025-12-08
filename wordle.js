@@ -1,7 +1,12 @@
 function letter_button(initial, score, row, col)
 {
     let $letter = $("<button id='let-" + row + "-" + col + "'>")
-        .text(initial).addClass("letter pop-in-element incorrect");
+        .addClass("letter pop-in-element incorrect");
+
+    let $letter_svg = $("<svg>").attr("viewBox", "0 0 56 18");
+    let $letter_text = $("<text>").attr("x", "0").attr("y", "15").text(initial)
+    $letter_svg.append($letter_text)
+
     $letter.click(function()
     {
         let options = ["incorrect", "correct", "misplaced"];
@@ -18,6 +23,8 @@ function letter_button(initial, score, row, col)
             }
         }
     });
+
+    $letter.append($letter_svg);
 
     return $letter
 }
@@ -99,7 +106,7 @@ function make_dialog(title, message, button_text, handler, text_input)
 
 document.addEventListener('DOMContentLoaded', () =>
 {
-    let $guesses = $("<div id='guesses'>").addClass("guesses");
+    let $guesses = $("<div id='guesses'>").addClass("guesses").addClass("hidden");
     $("#main").append($guesses);
 
     function clear_dialog()
@@ -118,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () =>
             if( response.next_guess )
             {
                 $dialog = make_dialog(response.title, response.message, "Next", next_guess_please, false);
+                $guesses.removeClass("hidden");
                 $guesses.append(add_guess(response.next_guess));
             }
             else
