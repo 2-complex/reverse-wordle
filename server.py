@@ -27,7 +27,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("content-type", "text/html")
             self.end_headers()
-            self.wfile.write(open(self.path[1:]).read().encode("utf-8"))
+            self.wfile.write(open(self.path[1:], "rb").read())
         else:
             self.send_error(404, "File not found: {}".format(self.path))
 
