@@ -9,6 +9,7 @@ import guesser
 class WebServerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         good_paths = set([
+            "/favicon.ico",
             "/jquery/jquery-ui.min.css",
             "/jquery/jquery-ui.min.js",
             "/jquery/jquery.min.js",
